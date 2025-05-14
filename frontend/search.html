@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recipe Search | Cookit</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>:root {
+    --primary-color: #FF6B6B;
+    --secondary-color: #4ECDC4;
+    --dark-color: #292F36;
+    --light-color: #F7FFF7;
+    --accent-color: #FFE66D;
+  }
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: var(--dark-color);
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  /* Header styles */
+  header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Sidebar styles */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 220px;
+    background-color: white;
+    padding: 2rem 1rem;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+  }
+  
+  .sidebar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .sidebar nav ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar nav ul li {
+    margin-bottom: 1rem;
+  }
+  
+  .sidebar nav ul li a {
+    text-decoration: none;
+    color: var(--dark-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: block;
+    transition: all 0.3s ease;
+  }
+  
+  .sidebar nav ul li a:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--primary-color);
+    transform: translateX(5px);
+  }
+  
+  .sidebar nav ul li a i {
+    margin-right: 0.5rem;
+    width: 20px;
+    text-align: center;
+  }
+  
+  /* Main content container */
+  .container {
+    margin-left: 250px;
+    padding: 1rem;
+    max-width: 1200px;
+  }
+  
+  /* Tab styles */
+  .nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .nav-tabs .nav-link {
+    color: var(--dark-color);
+    font-weight: 500;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    margin-right: 0.5rem;
+    border-radius: 4px 4px 0 0;
+  }
+  
+  .nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: var(--primary-color);
+  }
+  
+  .nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: white;
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: 600;
+  }
+  
+  /* Form styles */
+  .form-control {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: #ff5252;
+    border-color: #ff5252;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Recipe card styles */
+  .recipe-card {
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Suggestions dropdown */
+  #suggestions-list {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .suggestion-item:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--primary-color);
+  }
+  
+  /* Loading spinner */
+  #loading-spinner {
+    margin: 2rem 0;
+    color: var(--primary-color);
+  }
+  
+  /* Footer styles */
+  footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+  }
+  
+  footer p {
+    margin-bottom: 0;
+  }
+  
+  /* Radial menu */
+  .radial-menu {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+  }
+  
+  .menu-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+  
+  .menu-button:hover {
+    transform: scale(1.1);
+  }
+  
+  .menu-items {
+    display: none;
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .menu-items.active {
+    display: flex;
+  }
+  
+  .menu-item {
+    background-color: var(--secondary-color);
+    color: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .menu-item:hover {
+    background-color: #3dbeb6;
+    transform: scale(1.1);
+  }
+  /* Enhanced Recipe Cards */
+.recipe-card {
+  perspective: 1000px;
+}
+
+.card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.5s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px) rotateX(5deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-body {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .card-overlay {
+  opacity: 1;
+}
+
+.card-title {
+  position: relative;
+  z-index: 2;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+.card:hover .card-title {
+  transform: translateY(-10px);
+}
+
+.nutrition-badge {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.6rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.recipe-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.recipe-time {
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+.recipe-difficulty {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.difficulty-easy {
+  background-color: rgba(78, 205, 196, 0.2);
+  color: var(--secondary-color);
+}
+
+.difficulty-medium {
+  background-color: rgba(255, 230, 109, 0.2);
+  color: var(--accent-color);
+}
+
+.difficulty-hard {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: var(--primary-color);
+}
+
+.save-recipe {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.card:hover .save-recipe {
+  opacity: 1;
+}
+
+.save-recipe:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Pagination */
+.pagination {
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.page-link {
+  color: var(--primary-color);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+}
+
+/* Tooltips */
+.tooltip-inner {
+  background-color: var(--dark-color);
+}
+
+.bs-tooltip-auto[x-placement^=top] .arrow::before, 
+.bs-tooltip-top .arrow::before {
+  border-top-color: var(--dark-color);
+}
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 70px;
+    padding: 1rem 0.5rem;
+    overflow: hidden;
+  }
+  
+  .sidebar-brand {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .sidebar nav ul li a span {
+    display: none;
+  }
+  
+  .sidebar nav ul li a i {
+    margin-right: 0;
+    font-size: 1.2rem;
+  }
+  
+  .container {
+    margin-left: 90px;
+    padding: 0.5rem;
+  }
+  
+  header h1 {
+    font-size: 2rem;
+  }
+  
+  .nav-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .sidebar-brand {
+    display: none;
+  }
+  
+  .sidebar nav ul {
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+  }
+  
+  .sidebar nav ul li {
+    margin: 0;
+  }
+  
+  .sidebar nav ul li a {
+    padding: 0.5rem;
+  }
+  
+  .container {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  
+  header {
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+  }
+  
+  header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .nav-tabs .nav-link {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .form-row {
+    flex-wrap: wrap;
+  }
+  
+  .form-group.col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .recipe-card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-img-top {
+    height: 160px;
+  }
+  
+  .radial-menu {
+    bottom: 15px;
+    right: 15px;
+  }
+  
+  .menu-button {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 576px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+  
+  .form-group.col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .card-img-top {
+    height: 140px;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .recipe-meta {
+    flex-direction: column;
+  }
+  
+  .recipe-time, .recipe-difficulty {
+    margin-bottom: 0.5rem;
+  }
+  
+  .menu-items {
+    bottom: 60px;
+  }
+  
+  .menu-item {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <i class="fas fa-utensils"></i> Cookit
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html"><i class="fas fa-home"></i> <span>Home</span></a></li>
+        <li><a href="search.html"><i class="fas fa-search"></i> <span>Search</span></a></li>
+        <li><a href="recipe-details.html"><i class="fas fa-book-open"></i> <span>Recipes</span></a></li>
+        <li><a href="user-dashboard.html"><i class="fas fa-user"></i> <span>Dashboard</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <header class="text-center">
+    <div class="container">
+      <h1><i class="fas fa-search"></i> Recipe Search</h1>
+      <p class="lead">Discover delicious recipes tailored to your taste</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="text-center">Search Recipes</h1>
+    <ul class="nav nav-tabs" id="searchTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="name-tab" data-toggle="tab" href="#search-by-name" role="tab">Search by Name</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="ingredients-tab" data-toggle="tab" href="#search-by-ingredients" role="tab">Search by Ingredients</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nutrition-tab" data-toggle="tab" href="#search-by-nutrition" role="tab">Search by Nutrition</a>
+      </li>
+    </ul>
+
+    <div class="tab-content mt-4" id="searchTabsContent">
+      <!-- Search by Name -->
+      <div class="tab-pane fade show active" id="search-by-name" role="tabpanel">
+        <form id="search-form">
+          <div class="form-group">
+            <input type="text" id="search-input" class="form-control" placeholder="Enter recipe name..." autocomplete="off">
+            <div id="suggestions-list" class="hidden"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+      </div>
+
+      <!-- Search by Ingredients -->
+      <div class="tab-pane fade" id="search-by-ingredients" role="tabpanel">
+        <form id="ingredient-search-form">
+          <div class="form-group">
+            <input type="text" id="ingredients" class="form-control" placeholder="Enter ingredients (comma-separated)...">
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+      </div>
+
+      <!-- Search by Nutrition -->
+      <div class="tab-pane fade" id="search-by-nutrition" role="tabpanel">
+        <form id="nutrient-search-form">
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <input type="number" id="calories" class="form-control" placeholder="Max Calories" min="0">
+            </div>
+            <div class="form-group col-md-3">
+              <input type="number" id="protein" class="form-control" placeholder="Max Protein (g)" min="0">
+            </div>
+            <div class="form-group col-md-3">
+              <input type="number" id="carbs" class="form-control" placeholder="Max Carbs (g)" min="0">
+            </div>
+            <div class="form-group col-md-3">
+              <input type="number" id="fat" class="form-control" placeholder="Max Fat (g)" min="0">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="loading-spinner" class="text-center hidden">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <p class="mt-2">Searching recipes...</p>
+    </div>
+    <div id="error-message" class="alert alert-danger hidden" role="alert"></div>
+    <div id="results-list" class="row mt-4"></div>
+  </div>
+
+  <footer class="text-center py-4">
+    <div class="container">
+      <p>&copy; 2025 Cookit. All rights reserved.</p>
+      <div class="social-links mt-2">
+        <a href="#" class="text-white mx-2"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="text-white mx-2"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="text-white mx-2"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="text-white mx-2"><i class="fab fa-pinterest"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Radial Menu -->
+  <div class="radial-menu">
+    <button class="menu-button" id="menuButton">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="menu-items">
+      <a href="user-dashboard.html" class="menu-item" title="Dashboard"><i class="fas fa-user"></i></a>
+      <a href="index.html" class="menu-item" title="Home"><i class="fas fa-home"></i></a>
+      <a href="search.html" class="menu-item" title="Search"><i class="fas fa-search"></i></a>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="search.js"></script>
+</body>
+</html>

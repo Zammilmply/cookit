@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | Cookit</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --dark-color: #292F36;
+            --light-color: #F7FFF7;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: var(--dark-color);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-form {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff5252;
+            border-color: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .avatar-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .avatar-upload {
+            display: none;
+        }
+        
+        .change-avatar {
+            display: block;
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin-left: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="text-center">
+        <div class="container">
+            <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+            <p class="lead">Update your personal information</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="profile-form">
+                    <div class="avatar-container">
+                        <img src="https://via.placeholder.com/120" alt="Profile Picture" class="avatar" id="avatar-preview">
+                        <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
+                        <span class="change-avatar" id="change-avatar">Change Profile Picture</span>
+                    </div>
+                    
+                    <form id="edit-profile-form">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
+                            <div class="invalid-feedback">Please provide your full name.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                            <div class="invalid-feedback">Please provide a valid email address.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
+                            <div class="invalid-feedback">Please provide a valid phone number.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" class="form-control" required>
+                            <div class="invalid-feedback">Please provide your date of birth.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" class="form-control" rows="3" placeholder="Tell us about yourself"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" id="address" class="form-control" placeholder="Enter your address">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="city">City</label>
+                                <input type="text" id="city" class="form-control" placeholder="Enter your city">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="country">Country</label>
+                                <input type="text" id="country" class="form-control" placeholder="Enter your country">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                Save Changes
+                                <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true"></span>
+                            </button>
+                            <a href="user-dashboard.html" class="btn btn-outline-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const API_BASE_URL = 'http://localhost:5000/api';
+            const token = localStorage.getItem('token');
+
+            // Check authentication
+            if (!token) {
+                alert('You must be logged in to edit your profile.');
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Avatar upload functionality
+            document.getElementById('change-avatar').addEventListener('click', () => {
+                document.getElementById('avatar-upload').click();
+            });
+
+            document.getElementById('avatar-upload').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        document.getElementById('avatar-preview').src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Form validation
+            const form = document.getElementById('edit-profile-form');
+            const inputs = form.querySelectorAll('input[required], textarea[required]');
+
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+            });
+
+            // Fetch current user profile
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+
+                const user = await response.json();
+                
+                // Populate form fields
+                document.getElementById('name').value = user.name || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = user.phone || '';
+                document.getElementById('dob').value = user.dob ? new Date(user.dob).toISOString().split('T')[0] : '';
+                document.getElementById('bio').value = user.bio || '';
+                document.getElementById('address').value = user.address || '';
+                document.getElementById('city').value = user.city || '';
+                document.getElementById('country').value = user.country || '';
+                
+                if (user.avatar) {
+                    document.getElementById('avatar-preview').src = user.avatar;
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'danger');
+            }
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validate form
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) return;
+
+                // Show loading spinner
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                const spinner = submitBtn.querySelector('.loading-spinner');
+                spinner.style.display = 'inline-block';
+
+                // Prepare form data
+                const updatedProfile = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    dob: document.getElementById('dob').value,
+                    bio: document.getElementById('bio').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    country: document.getElementById('country').value
+                };
+
+                // Handle avatar upload if changed
+                const avatarFile = document.getElementById('avatar-upload').files[0];
+                if (avatarFile) {
+                    const formData = new FormData();
+                    formData.append('avatar', avatarFile);
+                    for (const key in updatedProfile) {
+                        formData.append(key, updatedProfile[key]);
+                    }
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/user/profile`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to update profile');
+                        }
+
+                        showAlert('Profile updated successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'user-dashboard.html';
+                        }, 1500);
+                    } catch (error) {
+                        showAlert(`Error: ${error.message}`, 'danger');
+                    } finally {
+                        submitBtn.disabled = false;
+                        spinner.style.display = 'none';
+                    }
+                } else {
+                    // Regular JSON update without avatar
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/user/profile`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(updatedProfile)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to update profile');
+                        }
+
+                        showAlert('Profile updated successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'user-dashboard.html';
+                        }, 1500);
+                    } catch (error) {
+                        showAlert(`Error: ${error.message}`, 'danger');
+                    } finally {
+                        submitBtn.disabled = false;
+                        spinner.style.display = 'none';
+                    }
+                }
+            });
+
+            function showAlert(message, type) {
+                // Remove any existing alerts
+                const existingAlert = document.querySelector('.alert');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                // Create alert element
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+
+                // Insert alert
+                form.prepend(alertDiv);
+            }
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Recipe</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Header section for the Add Recipe page -->
+    <header class="text-center py-3 bg-primary text-white">
+        <h1>Add a New Recipe</h1>
+    </header>
+    <!-- Main content area with the recipe form -->
+    <main class="container my-4">
+        <form id="add-recipe-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="recipe-name">Recipe Name</label>
+                <input type="text" id="recipe-name" class="form-control" placeholder="Enter recipe name" required>
+            </div>
+            <div class="form-group">
+                <label for="recipe-ingredients">Ingredients (comma-separated)</label>
+                <textarea id="recipe-ingredients" class="form-control" placeholder="Enter ingredients" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="recipe-instructions">Instructions</label>
+                <textarea id="recipe-instructions" class="form-control" placeholder="Enter instructions" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="calories">Calories</label>
+                <input type="number" id="calories" class="form-control" placeholder="Enter calories" required>
+            </div>
+            <div class="form-group">
+                <label for="protein">Protein (g)</label>
+                <input type="number" id="protein" class="form-control" placeholder="Enter protein amount" required>
+            </div>
+            <div class="form-group">
+                <label for="fat">Fat (g)</label>
+                <input type="number" id="fat" class="form-control" placeholder="Enter fat amount" required>
+            </div>
+            <div class="form-group">
+                <label for="carbs">Carbohydrates (g)</label>
+                <input type="number" id="carbs" class="form-control" placeholder="Enter carbohydrate amount" required>
+            </div>
+            <div class="form-group">
+                <label for="recipe-image">Recipe Image</label>
+                <input type="file" id="recipe-image" class="form-control" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Recipe</button>
+        </form>
+    </main>
+    <!-- JavaScript to handle form submission and API call -->
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api'; // Ensure this matches your backend URL
+
+        document.getElementById('add-recipe-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('name', document.getElementById('recipe-name').value);
+            formData.append('ingredients', document.getElementById('recipe-ingredients').value);
+            formData.append('instructions', document.getElementById('recipe-instructions').value);
+            formData.append('calories', document.getElementById('calories').value);
+            formData.append('protein', document.getElementById('protein').value);
+            formData.append('fat', document.getElementById('fat').value);
+            formData.append('carbs', document.getElementById('carbs').value);
+            formData.append('image', document.getElementById('recipe-image').files[0]);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/recipes`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to add recipe');
+                }
+
+                alert('Recipe added successfully!');
+                window.location.href = 'user-dashboard.html';
+            } catch (error) {
+                console.error('Error adding recipe:', error.message);
+                alert(`Error: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    header {
+      background: linear-gradient(135deg, #2c3e50, #4a6fa5);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    #recipe-title {
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    #recipe-image {
+      max-height: 500px;
+      object-fit: cover;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    #recipe-image:hover {
+      transform: scale(1.02);
+    }
+    .list-group-item {
+      border-left: none;
+      border-right: none;
+      padding: 12px 20px;
+    }
+    .nutrition-badge {
+      background-color: #4a6fa5;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    .action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .action-btn:hover {
+      transform: translateY(-3px);
+    }
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+    }
+    .step-number {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background-color: #4a6fa5;
+      color: white;
+      text-align: center;
+      border-radius: 50%;
+      margin-right: 10px;
+      line-height: 28px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .progress {
+      height: 8px;
+    }
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .ingredient-checkbox {
+      margin-right: 10px;
+    }
+    .equipment-badge {
+      background-color: #6c757d;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    .ingredient-badge {
+      background-color: #28a745;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- This section displays the recipe title, description, and basic details -->
+  <header class="text-white py-4">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 id="recipe-title" class="mb-2">Loading Recipe...</h1>
+          <p id="recipe-description" class="lead mb-3">Fetching recipe details...</p>
+          <div class="d-flex gap-2">
+            <span class="nutrition-badge"><i class="fas fa-clock me-1"></i> <span id="recipe-time">N/A</span></span>
+            <span class="nutrition-badge"><i class="fas fa-utensils me-1"></i> <span id="recipe-servings">N/A</span></span>
+            <span class="nutrition-badge"><i class="fas fa-fire me-1"></i> <span id="recipe-calories">N/A</span></span>
+          </div>
+        </div>
+        <div class="d-flex">
+          <div class="action-btn bg-primary text-white" id="print-btn" title="Print Recipe">
+            <i class="fas fa-print"></i>
+          </div>
+          <div class="action-btn bg-primary text-white" id="share-btn" title="Share Recipe">
+            <i class="fas fa-share-alt"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main content area for recipe details -->
+  <main class="container my-4">
+    <div id="loading-spinner" class="loading-spinner">
+      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    
+    <div id="recipe-content" class="d-none">
+      <div class="row">
+        <div class="col-lg-8">
+          <img id="recipe-image" class="img-fluid rounded mb-4" src="" alt="Recipe Image">
+          
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3><i class="fas fa-list-ul me-2 text-primary"></i>Ingredients</h3>
+            <div>
+              <button id="copy-ingredients" class="btn btn-sm btn-outline-primary me-2">
+                <i class="fas fa-copy me-1"></i>Copy
+              </button>
+              <button id="check-all" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-check-double me-1"></i>Check All
+              </button>
+            </div>
+          </div>
+          <ul id="recipe-ingredients" class="list-group mb-4"></ul>
+          
+          <h3 class="mb-3"><i class="fas fa-list-ol me-2 text-primary"></i>Instructions</h3>
+          <div id="recipe-instructions"></div>
+        </div>
+        
+        <div class="col-lg-4">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Recipe Details</h4>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-user-friends me-2 text-muted"></i>Servings</span>
+                <span class="badge bg-primary rounded-pill" id="servings-badge">N/A</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-clock me-2 text-muted"></i>Prep Time</span>
+                <span id="prep-time">N/A</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-clock me-2 text-muted"></i>Cook Time</span>
+                <span id="cook-time">N/A</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-fire me-2 text-muted"></i>Calories</span>
+                <span id="calories-detail">N/A</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-tags me-2 text-muted"></i>Category</span>
+                <span id="recipe-category">N/A</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="fas fa-chart-pie me-2 text-primary"></i>Nutritional Content</h4>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span><i class="fas fa-dumbbell me-2 text-muted"></i>Protein</span>
+                  <span id="nutrition-protein">0g</span>
+                </div>
+                <div class="progress">
+                  <div id="protein-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span><i class="fas fa-bread-slice me-2 text-muted"></i>Carbs</span>
+                  <span id="nutrition-carbs">0g</span>
+                </div>
+                <div class="progress">
+                  <div id="carbs-bar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span><i class="fas fa-bacon me-2 text-muted"></i>Fat</span>
+                  <span id="nutrition-fat">0g</span>
+                </div>
+                <div class="progress">
+                  <div id="fat-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="error-message" class="text-center py-5 d-none">
+      <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+      <h3 class="text-danger">Failed to Load Recipe</h3>
+      <p class="text-muted">We couldn't load the recipe details. Please try again later.</p>
+      <button id="retry-button" class="btn btn-primary mt-3">
+        <i class="fas fa-sync-alt me-1"></i>Try Again
+      </button>
+    </div>
+  </main>
+  
+  <!-- Footer section -->
+  <footer class="text-center py-4 bg-light mt-5">
+    <p class="mb-0">&copy; 2025 Cookit. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // JavaScript logic for handling recipe details
+    document.addEventListener('DOMContentLoaded', async () => {
+      // DOM Elements
+      const recipeTitle = document.getElementById('recipe-title');
+      const recipeDescription = document.getElementById('recipe-description');
+      const recipeImage = document.getElementById('recipe-image');
+      const recipeIngredients = document.getElementById('recipe-ingredients');
+      const recipeInstructions = document.getElementById('recipe-instructions');
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const recipeContent = document.getElementById('recipe-content');
+      const errorMessage = document.getElementById('error-message');
+      const retryButton = document.getElementById('retry-button');
+      const copyIngredientsBtn = document.getElementById('copy-ingredients');
+      const printBtn = document.getElementById('print-btn');
+      const shareBtn = document.getElementById('share-btn');
+      const checkAllBtn = document.getElementById('check-all');
+
+      // Get recipe ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const recipeId = urlParams.get('id');
+
+      // API Base URL - Update this to your actual API endpoint
+      const API_BASE_URL = 'http://localhost:5000/api';
+
+      // Load recipe data
+      if (recipeId) {
+        await loadRecipe(recipeId);
+      } else {
+        showError('No recipe ID provided');
+        window.location.href = 'index.html';
+      }
+
+      // Event listeners
+      retryButton.addEventListener('click', () => window.location.reload());
+      copyIngredientsBtn.addEventListener('click', copyIngredientsToClipboard);
+      printBtn.addEventListener('click', printRecipe);
+      shareBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: document.getElementById('recipe-title').textContent,
+            text: 'Check out this amazing recipe!',
+            url: window.location.href
+          }).then(() => {
+            console.log('Thanks for sharing!');
+          }).catch(console.error);
+        } else {
+          alert('Sharing is not supported in your browser.');
+        }
+      });
+      checkAllBtn.addEventListener('click', toggleCheckAllIngredients);
+
+      async function loadRecipe(id) {
+        try {
+          showLoading();
+
+          // Fetch recipe details from the API
+          const response = await fetch(`${API_BASE_URL}/recipes/${id}`);
+          if (!response.ok) throw new Error('Failed to fetch recipe details');
+
+          const recipe = await response.json();
+          renderRecipe(recipe);
+          
+          // Add nutrition chart if data available
+          if (recipe.nutrition?.nutrients) {
+            renderNutrientChart(recipe.nutrition.nutrients);
+          }
+          
+        } catch (error) {
+          console.error('Error loading recipe:', error);
+          showError('Failed to load recipe. Please try again later.');
+        }
+      }
+
+      function renderRecipe(recipe) {
+        // Basic info
+        recipeTitle.textContent = recipe.title || 'Unknown Title';
+        recipeDescription.textContent = recipe.description || 'No description available.';
+        recipeImage.src = recipe.image || 'https://via.placeholder.com/300x200';
+        recipeImage.alt = recipe.title || 'Recipe Image';
+
+        // Times and servings
+        document.getElementById('recipe-time').textContent = recipe.readyInMinutes ? `${recipe.readyInMinutes} mins` : 'N/A';
+        document.getElementById('recipe-servings').textContent = recipe.servings || 'N/A';
+        document.getElementById('recipe-calories').textContent = recipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount 
+          ? `${Math.round(recipe.nutrition.nutrients.find(n => n.name === 'Calories').amount)} kcal` 
+          : 'N/A';
+        document.getElementById('servings-badge').textContent = recipe.servings || 'N/A';
+        document.getElementById('prep-time').textContent = recipe.prepTimeMinutes ? `${recipe.prepTimeMinutes} mins` : 'N/A';
+        document.getElementById('cook-time').textContent = recipe.cookTimeMinutes ? `${recipe.cookTimeMinutes} mins` : 'N/A';
+        document.getElementById('calories-detail').textContent = recipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount 
+          ? `${Math.round(recipe.nutrition.nutrients.find(n => n.name === 'Calories').amount)} kcal` 
+          : 'N/A';
+        document.getElementById('recipe-category').textContent = recipe.cuisines?.[0] || recipe.dishTypes?.[0] || 'Uncategorized';
+
+        // Nutrition info
+        const protein = recipe.nutrition?.nutrients?.find(n => n.name === 'Protein')?.amount || 0;
+        const carbs = recipe.nutrition?.nutrients?.find(n => n.name === 'Carbohydrates')?.amount || 0;
+        const fat = recipe.nutrition?.nutrients?.find(n => n.name === 'Fat')?.amount || 0;
+        
+        document.getElementById('nutrition-protein').textContent = `${Math.round(protein)}g`;
+        document.getElementById('nutrition-carbs').textContent = `${Math.round(carbs)}g`;
+        document.getElementById('nutrition-fat').textContent = `${Math.round(fat)}g`;
+        updateNutritionBars(protein, carbs, fat);
+
+        // Enhanced ingredients display
+        displayIngredients(recipe.extendedIngredients || []);
+        
+        // Enhanced instructions display
+        displayInstructions(recipe.analyzedInstructions || []);
+
+        // Show content
+        hideLoading();
+      }
+
+      function displayIngredients(ingredients) {
+        recipeIngredients.innerHTML = '';
+        
+        if (ingredients.length) {
+          ingredients.forEach(ingredient => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.innerHTML = `
+              <div class="ingredient-item">
+                <input type="checkbox" class="ingredient-checkbox form-check-input me-2">
+                <span>${ingredient.original || ingredient.name}</span>
+              </div>
+              ${ingredient.measures?.metric ? `<small class="text-muted">${ingredient.measures.metric.amount} ${ingredient.measures.metric.unitShort}</small>` : ''}
+            `;
+            recipeIngredients.appendChild(li);
+          });
+        } else {
+          recipeIngredients.innerHTML = '<li class="list-group-item">No ingredients available.</li>';
+        }
+      }
+
+      function displayInstructions(instructions) {
+        recipeInstructions.innerHTML = '';
+        
+        if (instructions.length && instructions[0].steps) {
+          instructions[0].steps.forEach(step => {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'd-flex align-items-start mb-4';
+            stepDiv.innerHTML = `
+              <span class="step-number">${step.number}</span>
+              <div class="flex-grow-1">
+                <p>${step.step}</p>
+                ${step.ingredients?.length ? `
+                  <div class="mb-2">
+                    <small class="text-muted">Ingredients:</small>
+                    ${step.ingredients.map(ing => 
+                      `<span class="badge ingredient-badge">${ing.name}</span>`
+                    ).join('')}
+                  </div>
+                ` : ''}
+                ${step.equipment?.length ? `
+                  <div>
+                    <small class="text-muted">Equipment:</small>
+                    ${step.equipment.map(eq => 
+                      `<span class="badge equipment-badge">${eq.name}</span>`
+                    ).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+            recipeInstructions.appendChild(stepDiv);
+          });
+        } else {
+          recipeInstructions.innerHTML = '<p>No instructions available.</p>';
+        }
+      }
+
+      function updateNutritionBars(protein, carbs, fat) {
+  // Validate input values
+  const proteinValue = parseFloat(protein) || 0;
+  const carbsValue = parseFloat(carbs) || 0;
+  const fatValue = parseFloat(fat) || 0;
+
+  // Calculate percentages (for visualization only)
+  const proteinPercent = Math.min((proteinValue / 50) * 100, 100); // Assuming 50g is the daily need
+  const carbsPercent = Math.min((carbsValue / 300) * 100, 100); // Assuming 300g is the daily need
+  const fatPercent = Math.min((fatValue / 70) * 100, 100); // Assuming 70g is the daily need
+
+  // Update bar widths
+  document.getElementById('protein-bar').style.width = `${proteinPercent}%`;
+  document.getElementById('carbs-bar').style.width = `${carbsPercent}%`;
+  document.getElementById('fat-bar').style.width = `${fatPercent}%`;
+
+  // Update bar labels
+  document.getElementById('nutrition-protein').textContent = `${proteinValue}g`;
+  document.getElementById('nutrition-carbs').textContent = `${carbsValue}g`;
+  document.getElementById('nutrition-fat').textContent = `${fatValue}g`;
+}
+      function copyIngredientsToClipboard() {
+        const ingredients = Array.from(recipeIngredients.querySelectorAll('li span'))
+          .map(span => span.textContent)
+          .join('\n');
+        
+        navigator.clipboard.writeText(ingredients)
+          .then(() => {
+            const originalText = copyIngredientsBtn.innerHTML;
+            copyIngredientsBtn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            setTimeout(() => {
+              copyIngredientsBtn.innerHTML = originalText;
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Failed to copy ingredients:', err);
+          });
+      }
+
+      function toggleCheckAllIngredients() {
+        const checkboxes = recipeIngredients.querySelectorAll('.ingredient-checkbox');
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+        
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = !allChecked;
+        });
+        
+        checkAllBtn.innerHTML = allChecked 
+          ? '<i class="fas fa-check-double me-1"></i>Check All' 
+          : '<i class="fas fa-times me-1"></i>Uncheck All';
+      }
+
+      function printRecipe() {
+        window.print();
+      }
+
+      function showLoading() {
+        loadingSpinner.classList.remove('d-none');
+        recipeContent.classList.add('d-none');
+        errorMessage.classList.add('d-none');
+      }
+
+      function hideLoading() {
+        loadingSpinner.classList.add('d-none');
+        recipeContent.classList.remove('d-none');
+        errorMessage.classList.add('d-none');
+      }
+
+      function showError(message) {
+        loadingSpinner.classList.add('d-none');
+        recipeContent.classList.add('d-none');
+        errorMessage.classList.remove('d-none');
+        errorMessage.querySelector('p').textContent = message;
+      }
+    });
+  </script>
+</body>
+</html>
